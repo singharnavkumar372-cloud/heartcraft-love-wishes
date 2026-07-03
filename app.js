@@ -95,78 +95,93 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================================
-     MULTI-FORMAT URL PAYLOAD PARSER
+     BULLETPROOF MULTI-FORMAT URL PAYLOAD PARSER
      ========================================================================== */
   function getPayloadFromUrl() {
     let rawStr = null;
 
-    // 1. Check URL query parameters (?card=... or ?data=...)
+    // 1. Check URL query parameters (?card=... or ?data=... or ?c=...)
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('card')) {
-        rawStr = urlParams.get('card');
-      } else if (urlParams.has('data')) {
-        rawStr = urlParams.get('data');
+      if (urlParams.has('card')) rawStr = urlParams.get('card');
+      else if (urlParams.has('data')) rawStr = urlParams.get('data');
+      else if (urlParams.has('c')) rawStr = urlParams.get('c');
+    } catch(e) {}
+
+    // 2. Check URL Hash (#card=... or #data=... or #c=...)
+    if (!rawStr && window.location.hash) {
+      const hash = window.location.hash;
+      const match = hash.match(/(?:card|data|c)=([^&]+)/);
+      if (match) rawStr = match[1];
+    }
+
+    // 3. Regex match anywhere in location.href (e.g. if %23card= or %3Fcard=)
+    if (!rawStr) {
+      const href = decodeURIComponent(window.location.href);
+      const match = href.match(/(?:card|data|c)=([^&/#]+)/);
+      if (match) rawStr = match[1];
+    }
+
+    // Attempt Base64 URL Decode
+    if (rawStr) {
+      rawStr = rawStr.split('&')[0].split('#')[0].trim();
+      try {
+        const decoded = decodePayload(rawStr);
+        if (decoded && decoded.boyName && decoded.girlName) {
+          return decoded;
+        }
+      } catch (e) {
+        console.error("Base64 payload decode error:", e);
+      }
+    }
+
+    // 4. Plain Query Params Fallback (?boy=Arnav&girl=Ananya&title=...&msg=...)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('boy') && params.has('girl')) {
+        return {
+          boyName: params.get('boy'),
+          girlName: params.get('girl'),
+          surpriseType: params.get('type') || 'gf-proposal',
+          title: params.get('title') || '',
+          message: params.get('msg') || params.get('message') || '',
+          specialDate: params.get('date') || '',
+          nickname: params.get('nick') || '',
+          theme: params.get('theme') || 'rose',
+          particleStyle: params.get('particle') || 'hearts',
+          musicTrack: params.get('music') || 'piano',
+          enableNoEscape: params.get('noescape') !== 'false'
+        };
+      }
+    } catch (e) {}
+
+    // 5. LocalStorage Fallback if user created on same browser
+    try {
+      const local = localStorage.getItem('heartcraft_last_card');
+      if (local && (window.location.search.includes('preview') || window.location.hash.includes('preview'))) {
+        return JSON.parse(local);
       }
     } catch(e) {}
 
-    // 2. Check URL Hash (#card=... or #data=...)
-    if (!rawStr && window.location.hash) {
-      const hash = window.location.hash;
-      if (hash.includes('card=')) {
-        rawStr = hash.split('card=')[1];
-      } else if (hash.includes('data=')) {
-        rawStr = hash.split('data=')[1];
-      }
-    }
-
-    // 3. Fallback Regex match anywhere in href
-    if (!rawStr) {
-      const fullHref = decodeURIComponent(window.location.href);
-      const match = fullHref.match(/(?:card|data)=([A-Za-z0-9_\-]+)/);
-      if (match && match[1]) {
-        rawStr = match[1];
-      }
-    }
-
-    if (!rawStr) return null;
-
-    // Clean trailing query or hash chars
-    rawStr = rawStr.split('&')[0].split('#')[0].trim();
-
-    try {
-      return decodePayload(rawStr);
-    } catch (e) {
-      console.error("Payload decode error:", e);
-      return null;
-    }
+    return null;
   }
 
   /* ==========================================================================
-     ROBUST UNICODE & EMOJI SAFE ENCODER / DECODER
+     ROBUST EMOJI & UNICODE SAFE ENCODER / DECODER
      ========================================================================== */
   function encodePayload(obj) {
     const jsonStr = JSON.stringify(obj);
-    const bytes = new TextEncoder().encode(jsonStr);
-    let binary = '';
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const utf8Str = encodeURIComponent(jsonStr);
+    const b64 = btoa(utf8Str);
+    return encodeURIComponent(b64);
   }
 
-  function decodePayload(base64Str) {
-    let base64 = base64Str.replace(/-/g, '+').replace(/_/g, '/');
-    while (base64.length % 4) {
-      base64 += '=';
-    }
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    const jsonStr = new TextDecoder().decode(bytes);
+  function decodePayload(str) {
+    if (!str) return null;
+    let unescaped = decodeURIComponent(str);
+    unescaped = unescaped.replace(/ /g, '+');
+    const utf8Str = atob(unescaped);
+    const jsonStr = decodeURIComponent(utf8Str);
     return JSON.parse(jsonStr);
   }
 
@@ -263,10 +278,20 @@ document.addEventListener('DOMContentLoaded', () => {
       state.musicTrack = document.getElementById('music-track').value;
       state.enableNoEscape = document.getElementById('enable-no-escape').checked;
 
+      // Save to localStorage as last created card
+      try {
+        localStorage.setItem('heartcraft_last_card', JSON.stringify(state));
+      } catch(e) {}
+
       // Encode Payload to Canonical Query URL
       const encodedPayload = encodePayload(state);
       const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
       const shareUrl = `${baseUrl}?card=${encodedPayload}`;
+
+      // Update URL without reloading page
+      try {
+        history.pushState(null, '', shareUrl);
+      } catch(e) {}
 
       // Show Link Ready Modal
       document.getElementById('ready-girl-name').innerText = state.girlName;
@@ -328,11 +353,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const envelopeCover = document.getElementById('envelope-cover');
     const quizOverlay = document.getElementById('quiz-overlay');
     const openBtn = document.getElementById('open-envelope-btn');
+    const waxSeal = document.querySelector('.wax-seal');
     const showcaseContent = document.getElementById('showcase-content');
 
-    document.getElementById('envelope-tagline').innerText = `A Special Surprise for ${girlNameStr}`;
+    document.getElementById('envelope-tagline').innerText = `${payload.boyName} Sent A Special Surprise for ${girlNameStr}`;
 
-    openBtn.onclick = () => {
+    const triggerOpenSurprise = () => {
       envelopeCover.classList.add('hidden');
       if (payload.quizQuestion && payload.quizAnswer) {
         // Require Quiz Answer
@@ -356,6 +382,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playAmbientAudio(payload.musicTrack);
       }
     };
+
+    if (openBtn) openBtn.onclick = triggerOpenSurprise;
+    if (waxSeal) waxSeal.onclick = triggerOpenSurprise;
 
     // Hide all experience containers first
     document.getElementById('proposal-card-container').classList.add('hidden');
