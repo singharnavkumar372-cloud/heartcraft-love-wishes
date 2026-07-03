@@ -13,13 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     message: '',
     specialDate: '',
     nickname: '',
+    quizQuestion: '',
+    quizAnswer: '',
     theme: 'rose',
     particleStyle: 'hearts',
     musicTrack: 'piano',
     enableNoEscape: true,
     audioPlaying: false,
-    audioCtx: null,
-    audioOscillator: null
+    audioCtx: null
   };
 
   // Preset Text Templates
@@ -70,23 +71,57 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Particle Canvas
   initParticlesCanvas();
 
-  // Check URL Hash Payload for Receiver View
-  if (window.location.hash && window.location.hash.startsWith('#card=')) {
-    try {
-      const encodedData = window.location.hash.replace('#card=', '');
-      const decodedJson = decodeURIComponent(escape(atob(encodedData)));
-      const payload = JSON.parse(decodedJson);
-      
-      // Render Recipient Experience
-      renderRecipientMode(payload);
-      return;
-    } catch (e) {
-      console.error("Invalid URL payload signature:", e);
+  // Register PWA Service Worker & Install Prompt
+  initPwaInstaller();
+
+  // Check Hash Signature
+  checkUrlPayload();
+
+  window.addEventListener('hashchange', checkUrlPayload);
+
+  function checkUrlPayload() {
+    if (window.location.hash && window.location.hash.includes('#card=')) {
+      try {
+        const rawPayloadStr = window.location.hash.split('#card=')[1];
+        const payload = decodePayload(rawPayloadStr);
+        if (payload && payload.boyName && payload.girlName) {
+          renderRecipientMode(payload);
+          return;
+        }
+      } catch (e) {
+        console.error("Payload decode error:", e);
+      }
     }
+    initCreatorStudio();
   }
 
-  // Otherwise Initialize Creator Studio
-  initCreatorStudio();
+  /* ==========================================================================
+     ROBUST UNICODE & EMOJI SAFE ENCODER / DECODER
+     ========================================================================== */
+  function encodePayload(obj) {
+    const jsonStr = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(jsonStr);
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function decodePayload(base64Str) {
+    let base64 = base64Str.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const jsonStr = new TextDecoder().decode(bytes);
+    return JSON.parse(jsonStr);
+  }
 
   /* ==========================================================================
      CREATOR STUDIO LOGIC
@@ -98,22 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step Navigation
     document.querySelectorAll('.btn-next').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.onclick = (e) => {
         const nextStep = e.currentTarget.getAttribute('data-next');
         switchStep(nextStep);
-      });
+      };
     });
 
     document.querySelectorAll('.btn-prev').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.onclick = (e) => {
         const prevStep = e.currentTarget.getAttribute('data-prev');
         switchStep(prevStep);
-      });
+      };
     });
 
     // Experience Selection
     document.querySelectorAll('.exp-card').forEach(card => {
-      card.addEventListener('click', (e) => {
+      card.onclick = (e) => {
         document.querySelectorAll('.exp-card').forEach(c => c.classList.remove('active'));
         const currentCard = e.currentTarget;
         currentCard.classList.add('active');
@@ -121,17 +156,16 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.checked = true;
         state.surpriseType = radio.value;
 
-        // Auto populate title & message preset if empty
         const preset = PRESETS[state.surpriseType];
         if (preset) {
           document.getElementById('custom-title').value = preset.title;
           document.getElementById('custom-message').value = preset.message;
         }
-      });
+      };
     });
 
     // Preset Button Click
-    document.getElementById('preset-btn').addEventListener('click', () => {
+    document.getElementById('preset-btn').onclick = () => {
       const radio = document.querySelector('input[name="surprise-type"]:checked');
       const type = radio ? radio.value : 'gf-proposal';
       const preset = PRESETS[type];
@@ -139,22 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('custom-title').value = preset.title;
         document.getElementById('custom-message').value = preset.message;
       }
-    });
+    };
 
     // Theme Selection
     document.querySelectorAll('.theme-card').forEach(card => {
-      card.addEventListener('click', (e) => {
+      card.onclick = (e) => {
         document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
         const currentCard = e.currentTarget;
         currentCard.classList.add('active');
         const theme = currentCard.getAttribute('data-theme');
         state.theme = theme;
         applyTheme(theme);
-      });
+      };
     });
 
     // Generate Share Link & Preview
-    document.getElementById('generate-btn').addEventListener('click', () => {
+    document.getElementById('generate-btn').onclick = () => {
       const boyName = document.getElementById('boy-name').value.trim();
       const girlName = document.getElementById('girl-name').value.trim();
 
@@ -170,20 +204,21 @@ document.addEventListener('DOMContentLoaded', () => {
       state.message = document.getElementById('custom-message').value.trim() || PRESETS[state.surpriseType].message;
       state.specialDate = document.getElementById('special-date').value;
       state.nickname = document.getElementById('nickname-girl').value.trim();
+      state.quizQuestion = document.getElementById('quiz-question').value.trim();
+      state.quizAnswer = document.getElementById('quiz-answer').value.trim();
       state.particleStyle = document.getElementById('particle-style').value;
       state.musicTrack = document.getElementById('music-track').value;
       state.enableNoEscape = document.getElementById('enable-no-escape').checked;
 
       // Encode Payload to Hash
-      const jsonStr = JSON.stringify(state);
-      const encodedPayload = btoa(unescape(encodeURIComponent(jsonStr)));
+      const encodedPayload = encodePayload(state);
       
       // Update URL hash
       window.location.hash = `#card=${encodedPayload}`;
 
       // Render Showcase Mode immediately
       renderRecipientMode(state);
-    });
+    };
   }
 
   function switchStep(stepNum) {
@@ -212,8 +247,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const girlNameStr = payload.nickname ? `${payload.girlName} (${payload.nickname})` : payload.girlName;
 
-    // Unseal Envelope Logic
+    // Countdown Timer Init
+    if (payload.specialDate) {
+      document.getElementById('countdown-bar').classList.remove('hidden');
+      startCountdown(payload.specialDate);
+    } else {
+      document.getElementById('countdown-bar').classList.add('hidden');
+    }
+
+    // Envelope & Quiz Overlay
     const envelopeCover = document.getElementById('envelope-cover');
+    const quizOverlay = document.getElementById('quiz-overlay');
     const openBtn = document.getElementById('open-envelope-btn');
     const showcaseContent = document.getElementById('showcase-content');
 
@@ -221,9 +265,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openBtn.onclick = () => {
       envelopeCover.classList.add('hidden');
-      showcaseContent.classList.remove('hidden');
-      fireConfetti();
-      playAmbientAudio(payload.musicTrack);
+      if (payload.quizQuestion && payload.quizAnswer) {
+        // Require Quiz Answer
+        quizOverlay.classList.remove('hidden');
+        document.getElementById('quiz-question-display').innerText = payload.quizQuestion;
+        
+        document.getElementById('submit-quiz-btn').onclick = () => {
+          const userAns = document.getElementById('quiz-answer-input').value.trim();
+          if (userAns.toLowerCase() === payload.quizAnswer.toLowerCase()) {
+            quizOverlay.classList.add('hidden');
+            showcaseContent.classList.remove('hidden');
+            fireConfetti();
+            playAmbientAudio(payload.musicTrack);
+          } else {
+            document.getElementById('quiz-error').classList.remove('hidden');
+          }
+        };
+      } else {
+        showcaseContent.classList.remove('hidden');
+        fireConfetti();
+        playAmbientAudio(payload.musicTrack);
+      }
     };
 
     // Hide all experience containers first
@@ -346,11 +408,86 @@ document.addEventListener('DOMContentLoaded', () => {
       window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     };
 
+    document.getElementById('download-card-btn').onclick = saveCardSnapshot;
+
     document.getElementById('qr-code-btn').onclick = () => openQrModal(currentUrl);
 
     navCreateBtn.onclick = () => {
       window.location.hash = '';
       window.location.reload();
+    };
+  }
+
+  /* ==========================================================================
+     COUNTDOWN TIMER ENGINE
+     ========================================================================== */
+  function startCountdown(dateStr) {
+    const targetDate = new Date(dateStr).getTime();
+    if (isNaN(targetDate)) return;
+
+    function update() {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        document.getElementById('cd-days').innerText = "00";
+        document.getElementById('cd-hours').innerText = "00";
+        document.getElementById('cd-mins').innerText = "00";
+        document.getElementById('cd-secs').innerText = "00";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+      document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+      document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
+      document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
+    }
+
+    update();
+    setInterval(update, 1000);
+  }
+
+  /* ==========================================================================
+     CARD SNAPSHOT DOWNLOADER
+     ========================================================================== */
+  function saveCardSnapshot() {
+    window.print();
+  }
+
+  /* ==========================================================================
+     PWA SERVICE WORKER & APP DOWNLOADER
+     ========================================================================== */
+  let deferredPrompt = null;
+
+  function initPwaInstaller() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration skipped', err));
+    }
+
+    const pwaBtn = document.getElementById('pwa-install-btn');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaBtn.style.display = 'inline-flex';
+    });
+
+    pwaBtn.onclick = async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      } else {
+        alert("📲 To install HeartCraft as an App on your phone:\n\n• Android/Chrome: Tap 3 dots (⋮) -> 'Add to Home screen' or 'Install app'\n• iPhone/Safari: Tap Share (⎋) -> 'Add to Home Screen'");
+      }
     };
   }
 
@@ -371,8 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       state.audioCtx = new AudioContext();
       
-      // Simple harmonic ambient chime generator
-      const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C E G C E
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
       let noteIndex = 0;
 
       const playChime = () => {
@@ -500,7 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.globalAlpha = p.opacity;
         ctx.fillStyle = '#ff3366';
         
-        // Draw Heart
         ctx.beginPath();
         const topCurveHeight = p.size * 0.3;
         ctx.moveTo(0, topCurveHeight);

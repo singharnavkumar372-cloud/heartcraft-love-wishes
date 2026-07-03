@@ -119,6 +119,7 @@ body {
 }
 
 .text-center { text-align: center; }
+.mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }
 .mt-4 { margin-top: 1.5rem; }
 .hidden { display: none !important; }
@@ -166,6 +167,19 @@ body {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.install-btn {
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.install-btn:hover {
+  background: var(--accent-gold);
+  color: #1a0628;
 }
 
 .icon-btn {
@@ -544,6 +558,44 @@ select:focus {
   100% { box-shadow: 0 0 30px var(--primary-color); transform: scale(1.08); }
 }
 
+/* Countdown Bar */
+.countdown-card {
+  padding: 16px 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.countdown-header {
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+  margin-bottom: 8px;
+}
+
+.countdown-timer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.timer-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: 12px;
+  min-width: 65px;
+}
+
+.timer-box span {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: block;
+}
+
+.timer-box small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* Showcase Cards */
 .card-display {
   padding: 40px 32px;
@@ -877,5 +929,8 @@ select:focus {
   }
   .receiver-share-bar button {
     width: 100%;
+  }
+  .install-btn span {
+    display: none;
   }
 }

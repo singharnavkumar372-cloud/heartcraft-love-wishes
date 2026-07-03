@@ -6,6 +6,13 @@
   <title>HeartCraft - Express Your Love & Create Timeless Moments</title>
   <meta name="description" content="Create customized romantic proposals, love letters, birthday wishes, and special surprises with instant shareable links!">
   
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff3366">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HeartCraft">
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +43,9 @@
         <span>HeartCraft</span>
       </div>
       <div class="nav-actions">
+        <button id="pwa-install-btn" class="btn btn-secondary install-btn" title="Download App to Home Screen">
+          <i class="fa-solid fa-download"></i> <span>Download App</span>
+        </button>
         <button id="music-toggle" class="icon-btn" title="Toggle Romantic Audio">
           <i class="fa-solid fa-music"></i>
         </button>
@@ -99,7 +109,7 @@
                   <div class="exp-content">
                     <span class="exp-icon">💖</span>
                     <h4>GF Proposal</h4>
-                    <p>"Will you be my girlfriend?" with playful interactive buttons.</p>
+                    <p>"Will you be my girlfriend?" with playful escaping No button.</p>
                   </div>
                 </label>
 
@@ -185,6 +195,13 @@
               </div>
             </div>
 
+            <!-- Quiz Option -->
+            <div class="input-group mt-3">
+              <label><i class="fa-solid fa-gamepad"></i> Add Interactive Secret Quiz Question (Optional)</label>
+              <input type="text" id="quiz-question" placeholder="e.g., Where did we have our first ice cream date?">
+              <input type="text" id="quiz-answer" class="mt-2" placeholder="e.g., Baskin Robbins (Answer required to unlock surprise)">
+            </div>
+
             <div class="step-actions">
               <button type="button" class="btn btn-secondary btn-prev" data-prev="1">
                 <i class="fa-solid fa-arrow-left"></i> Back
@@ -253,7 +270,7 @@
               <label class="checkbox-container">
                 <input type="checkbox" id="enable-no-escape" checked>
                 <span class="checkmark"></span>
-                <span>Enable Playful Escaping "No" Button (For Proposals - "No" button teleports away when hovered!)</span>
+                <span>Enable Playful Escaping "No" Button (For Proposals - "No" button teleports away!)</span>
               </label>
             </div>
 
@@ -288,9 +305,36 @@
         </div>
       </div>
 
+      <!-- Secret Quiz Challenge Modal (If configured) -->
+      <div id="quiz-overlay" class="envelope-overlay hidden">
+        <div class="wax-envelope-card glass-card">
+          <div class="heart-seal-wrapper">
+            <div class="wax-seal glow-pulse">
+              <i class="fa-solid fa-key"></i>
+            </div>
+          </div>
+          <h2 class="font-serif">Unlock My Heart 🔑</h2>
+          <p id="quiz-question-display" class="subtitle mt-2"></p>
+          <input type="text" id="quiz-answer-input" placeholder="Type your answer here..." class="mt-3">
+          <button id="submit-quiz-btn" class="btn btn-primary mt-3">Unlock Surprise <i class="fa-solid fa-lock-open"></i></button>
+          <p id="quiz-error" class="text-danger mt-2 hidden">Incorrect answer! Think closely about our sweet memories... ❤️</p>
+        </div>
+      </div>
+
       <!-- Main Showcase Content -->
       <div id="showcase-content" class="showcase-wrapper hidden">
         
+        <!-- COUNTDOWN TIMER (If special date present) -->
+        <div id="countdown-bar" class="countdown-card glass-card hidden">
+          <div class="countdown-header"><i class="fa-solid fa-hourglass-half"></i> Countdown to Our Special Moment</div>
+          <div class="countdown-timer">
+            <div class="timer-box"><span id="cd-days">00</span><small>Days</small></div>
+            <div class="timer-box"><span id="cd-hours">00</span><small>Hours</small></div>
+            <div class="timer-box"><span id="cd-mins">00</span><small>Mins</small></div>
+            <div class="timer-box"><span id="cd-secs">00</span><small>Secs</small></div>
+          </div>
+        </div>
+
         <!-- EXPERIENCE 1: PROPOSAL CARD (GF / WIFE) -->
         <div id="proposal-card-container" class="card-display glass-card hidden">
           <div class="romantic-header">
@@ -387,6 +431,9 @@
           </button>
           <button id="whatsapp-share-btn" class="btn btn-whatsapp">
             <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+          </button>
+          <button id="download-card-btn" class="btn btn-secondary">
+            <i class="fa-solid fa-camera"></i> Save as Image
           </button>
           <button id="qr-code-btn" class="btn btn-secondary">
             <i class="fa-solid fa-qrcode"></i> Show QR Code
