@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeartCraft - Express Your Love & Create Timeless Moments</title>
+  <meta name="description" content="Create customized romantic proposals, love letters, birthday wishes, and special surprises with instant shareable links!">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Canvas Confetti & QRCode JS -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-rose">
+
+  <!-- Background Animated Canvas -->
+  <canvas id="particles-canvas"></canvas>
+  <div class="glow-bg"></div>
+
+  <!-- Main Container -->
+  <div id="app" class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar glass-card">
+      <div class="logo">
+        <i class="fa-solid fa-heart heart-pulse"></i>
+        <span>HeartCraft</span>
+      </div>
+      <div class="nav-actions">
+        <button id="music-toggle" class="icon-btn" title="Toggle Romantic Audio">
+          <i class="fa-solid fa-music"></i>
+        </button>
+        <button id="theme-toggle" class="icon-btn" title="Change Theme">
+          <i class="fa-solid fa-palette"></i>
+        </button>
+        <button id="new-create-btn" class="btn btn-secondary nav-create-btn hidden">
+          <i class="fa-solid fa-plus"></i> Create Yours
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: CREATOR STUDIO (FORM MODE) -->
+    <main id="creator-view" class="view-section active">
+      <div class="hero-header text-center">
+        <span class="badge"><i class="fa-solid fa-sparkles"></i> Express Your Heart</span>
+        <h1 class="gradient-text">Craft Magical Love Proposals & Wishes</h1>
+        <p class="subtitle">Design customized romantic proposals, love letters, birthday surprises, and interactive memory moments with instant shareable links.</p>
+      </div>
+
+      <div class="studio-card glass-card">
+        <!-- Step Indicator -->
+        <div class="step-progress">
+          <div class="step-item active" data-step="1">
+            <span class="step-num">1</span>
+            <span class="step-label">Names & Type</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="2">
+            <span class="step-num">2</span>
+            <span class="step-label">Customize Content</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="3">
+            <span class="step-num">3</span>
+            <span class="step-label">Surprises & Theme</span>
+          </div>
+        </div>
+
+        <form id="love-form" onsubmit="return false;">
+          <!-- STEP 1: Basic Information -->
+          <div class="form-step active" id="step-1">
+            <h3><i class="fa-solid fa-user-hearts"></i> Who is this special surprise for?</h3>
+            
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="boy-name"><i class="fa-solid fa-mars"></i> Your Name (Boy / Sender)</label>
+                <input type="text" id="boy-name" placeholder="e.g., Arnav" required autocomplete="off">
+              </div>
+              <div class="input-group">
+                <label for="girl-name"><i class="fa-solid fa-venus"></i> Partner's Name (Girl / Recipient)</label>
+                <input type="text" id="girl-name" placeholder="e.g., Ananya" required autocomplete="off">
+              </div>
+            </div>
+
+            <div class="input-group mt-4">
+              <label><i class="fa-solid fa-wand-magic-sparkles"></i> Select Experience Type</label>
+              <div class="experience-grid">
+                <label class="exp-card active">
+                  <input type="radio" name="surprise-type" value="gf-proposal" checked hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">💖</span>
+                    <h4>GF Proposal</h4>
+                    <p>"Will you be my girlfriend?" with playful interactive buttons.</p>
+                  </div>
+                </label>
+
+                <label class="exp-card">
+                  <input type="radio" name="surprise-type" value="wife-proposal" hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">💍</span>
+                    <h4>Wife Proposal</h4>
+                    <p>"Will you marry me?" with virtual ring box reveal.</p>
+                  </div>
+                </label>
+
+                <label class="exp-card">
+                  <input type="radio" name="surprise-type" value="love-letter" hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">💌</span>
+                    <h4>Love Letter</h4>
+                    <p>Interactive wax-sealed envelope with typewriter text.</p>
+                  </div>
+                </label>
+
+                <label class="exp-card">
+                  <input type="radio" name="surprise-type" value="birthday-wish" hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">🎂</span>
+                    <h4>Birthday Wish</h4>
+                    <p>Interactive cake blowing, gifts & custom wishes.</p>
+                  </div>
+                </label>
+
+                <label class="exp-card">
+                  <input type="radio" name="surprise-type" value="anniversary-wish" hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">🥂</span>
+                    <h4>Anniversary Wish</h4>
+                    <p>Celebrate milestone years & precious memories.</p>
+                  </div>
+                </label>
+
+                <label class="exp-card">
+                  <input type="radio" name="surprise-type" value="reasons-love" hidden>
+                  <div class="exp-content">
+                    <span class="exp-icon">🧩</span>
+                    <h4>100 Reasons I Love You</h4>
+                    <p>Interactive card flipper deck with romantic traits.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="step-actions right">
+              <button type="button" class="btn btn-primary btn-next" data-next="2">
+                Next: Personalize Message <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Content Personalization -->
+          <div class="form-step" id="step-2">
+            <h3><i class="fa-solid fa-pen-fancy"></i> Personalize Your Message & Details</h3>
+
+            <div class="input-group">
+              <label for="custom-title"><i class="fa-solid fa-heading"></i> Headline / Catchphrase</label>
+              <input type="text" id="custom-title" placeholder="e.g., My Dearest Ananya, You Have Stolen My Heart Forever...">
+            </div>
+
+            <div class="input-group">
+              <div class="label-with-presets">
+                <label for="custom-message"><i class="fa-solid fa-heart"></i> Your Deepest Message</label>
+                <button type="button" id="preset-btn" class="text-link"><i class="fa-solid fa-dice-three"></i> Insert Romantic Preset</button>
+              </div>
+              <textarea id="custom-message" rows="5" placeholder="Write your heartfelt message here... You can describe how you met, your favorite memories, or why she means the world to you."></textarea>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="special-date"><i class="fa-solid fa-calendar-heart"></i> Special Date (Optional)</label>
+                <input type="date" id="special-date">
+              </div>
+              <div class="input-group">
+                <label for="nickname-girl"><i class="fa-solid fa-smile-beam"></i> Her Special Nickname (Optional)</label>
+                <input type="text" id="nickname-girl" placeholder="e.g., My Sunshine, Princess, Sweetheart">
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="btn btn-secondary btn-prev" data-prev="1">
+                <i class="fa-solid fa-arrow-left"></i> Back
+              </button>
+              <button type="button" class="btn btn-primary btn-next" data-next="3">
+                Next: Theme & Effects <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Themes, Music & Interactivity -->
+          <div class="form-step" id="step-3">
+            <h3><i class="fa-solid fa-sparkles"></i> Customize Aesthetics & Interactive Magic</h3>
+
+            <div class="input-group">
+              <label><i class="fa-solid fa-palette"></i> Choose Visual Theme</label>
+              <div class="theme-picker-grid">
+                <label class="theme-card active" data-theme="rose">
+                  <input type="radio" name="visual-theme" value="rose" checked hidden>
+                  <div class="theme-preview rose-bg"></div>
+                  <span>Rose Gold Glow</span>
+                </label>
+
+                <label class="theme-card" data-theme="midnight">
+                  <input type="radio" name="visual-theme" value="midnight" hidden>
+                  <div class="theme-preview midnight-bg"></div>
+                  <span>Midnight Starlight</span>
+                </label>
+
+                <label class="theme-card" data-theme="sunset">
+                  <input type="radio" name="visual-theme" value="sunset" hidden>
+                  <div class="theme-preview sunset-bg"></div>
+                  <span>Sunset Romance</span>
+                </label>
+
+                <label class="theme-card" data-theme="cyber">
+                  <input type="radio" name="visual-theme" value="cyber" hidden>
+                  <div class="theme-preview cyber-bg"></div>
+                  <span>Neon Dream</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="particle-style"><i class="fa-solid fa-cloud-sun"></i> Ambient Particle Effect</label>
+                <select id="particle-style">
+                  <option value="hearts">Floating Red & Pink Hearts</option>
+                  <option value="petals">Falling Rose Petals</option>
+                  <option value="stars">Sparkling Constellations</option>
+                  <option value="bubbles">Gentle Glowing Bubbles</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="music-track"><i class="fa-solid fa-music"></i> Background Soundscape</label>
+                <select id="music-track">
+                  <option value="piano">Romantic Piano Melodies</option>
+                  <option value="acoustic">Sweet Acoustic Guitar</option>
+                  <option value="lofi">Chill Love Lo-Fi</option>
+                  <option value="ambient">Dreamy Celestial Chimes</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="checkbox-container">
+                <input type="checkbox" id="enable-no-escape" checked>
+                <span class="checkmark"></span>
+                <span>Enable Playful Escaping "No" Button (For Proposals - "No" button teleports away when hovered!)</span>
+              </label>
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="btn btn-secondary btn-prev" data-prev="2">
+                <i class="fa-solid fa-arrow-left"></i> Back
+              </button>
+              <button type="button" id="generate-btn" class="btn btn-primary btn-glow">
+                <i class="fa-solid fa-wand-magic"></i> Generate Magic Share Link & Preview
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- VIEW 2: RECEIVER / PRESENTATION SHOWCASE VIEW -->
+    <main id="receiver-view" class="view-section">
+      <!-- Unseal Envelope / Tap to Open Cover -->
+      <div id="envelope-cover" class="envelope-overlay active">
+        <div class="wax-envelope-card glass-card">
+          <div class="heart-seal-wrapper">
+            <div class="wax-seal glow-pulse">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+          </div>
+          <h2 id="envelope-tagline" class="font-handwriting">A Secret Message For You</h2>
+          <p id="envelope-subtext">Tap the wax seal to unseal the magic</p>
+          <button id="open-envelope-btn" class="btn btn-primary btn-glow mt-3">
+            <i class="fa-solid fa-envelope-open"></i> Open Surprise
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Showcase Content -->
+      <div id="showcase-content" class="showcase-wrapper hidden">
+        
+        <!-- EXPERIENCE 1: PROPOSAL CARD (GF / WIFE) -->
+        <div id="proposal-card-container" class="card-display glass-card hidden">
+          <div class="romantic-header">
+            <span class="love-badge"><i class="fa-solid fa-crown"></i> Dedicated to <span id="view-girl-name">Her</span></span>
+            <h1 id="view-proposal-title" class="font-serif">Will You Be Mine Forever?</h1>
+            <p id="view-sender-sub">From <span id="view-boy-name">Him</span> with endless love <i class="fa-solid fa-heart text-danger"></i></p>
+          </div>
+
+          <!-- Virtual Ring Box (Visible for Wife Proposal) -->
+          <div id="ring-box-wrapper" class="ring-box-container hidden">
+            <div class="ring-box" id="virtual-ring-box">
+              <div class="ring-lid"><span>✨</span></div>
+              <div class="ring-base">
+                <div class="ring-cushion">
+                  <div class="diamond-ring">💍</div>
+                </div>
+              </div>
+            </div>
+            <p class="ring-prompt">Tap the ring box to unlock your diamond ring!</p>
+          </div>
+
+          <div class="letter-body-box">
+            <p id="view-proposal-message" class="typewriter-text font-serif-italic"></p>
+          </div>
+
+          <div class="proposal-actions mt-4" id="proposal-buttons-area">
+            <button id="yes-btn" class="btn btn-yes btn-glow">
+              <i class="fa-solid fa-heart"></i> YES! 1000x YES!
+            </button>
+            <button id="no-btn" class="btn btn-no">
+              No <i class="fa-solid fa-face-frown"></i>
+            </button>
+          </div>
+
+          <!-- Celebration Answer Banner (Hidden until Yes clicked) -->
+          <div id="yes-celebration-banner" class="celebration-banner hidden">
+            <h2>🎉 SHE SAID YES! 💍💖</h2>
+            <p>This is the start of our beautiful forever chapter!</p>
+            <div class="date-badge" id="celebration-date-badge"></div>
+          </div>
+        </div>
+
+        <!-- EXPERIENCE 2: LOVE LETTER CARD -->
+        <div id="love-letter-container" class="card-display glass-card hidden">
+          <div class="letter-header">
+            <i class="fa-solid fa-quote-left quote-icon"></i>
+            <h1 id="view-letter-title" class="font-handwriting">My Dearest Love</h1>
+          </div>
+          <div class="letter-scroll-content font-serif">
+            <div id="view-letter-body"></div>
+          </div>
+          <div class="letter-footer font-handwriting">
+            <p>Yours forever,</p>
+            <h3 id="view-letter-sender">Your Love</h3>
+          </div>
+        </div>
+
+        <!-- EXPERIENCE 3: BIRTHDAY WISH CARD -->
+        <div id="birthday-card-container" class="card-display glass-card hidden text-center">
+          <div class="bday-decor">🎂 ✨ 🎉</div>
+          <h1 id="view-bday-title" class="font-serif">Happy Birthday My Queen!</h1>
+          <p class="subtitle font-serif-italic">Wishing the most wonderful birthday to <span id="view-bday-girl"></span></p>
+
+          <!-- Interactive Birthday Cake -->
+          <div class="cake-container">
+            <div class="cake">
+              <div class="candle">
+                <div class="flame" id="cake-flame"></div>
+              </div>
+              <div class="icing"></div>
+              <div class="layer layer-top"></div>
+              <div class="layer layer-bottom"></div>
+            </div>
+            <p class="blow-candle-hint"><i class="fa-solid fa-wind"></i> Tap candle to blow out flame & make a wish!</p>
+          </div>
+
+          <div class="bday-message-box font-serif" id="view-bday-message"></div>
+        </div>
+
+        <!-- EXPERIENCE 4: REASONS I LOVE YOU DECK -->
+        <div id="reasons-card-container" class="card-display glass-card hidden">
+          <h1 class="text-center font-serif">Reasons Why I Love You ❤️</h1>
+          <p class="text-center subtitle">Tap each card to reveal why you are so irreplaceable</p>
+
+          <div id="reasons-grid" class="reasons-deck">
+            <!-- Dynamic cards injected via JS -->
+          </div>
+        </div>
+
+        <!-- Bottom Share & Action Bar for Receiver -->
+        <div class="receiver-share-bar glass-card mt-4">
+          <button id="copy-link-btn" class="btn btn-secondary">
+            <i class="fa-solid fa-copy"></i> Copy Link
+          </button>
+          <button id="whatsapp-share-btn" class="btn btn-whatsapp">
+            <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+          </button>
+          <button id="qr-code-btn" class="btn btn-secondary">
+            <i class="fa-solid fa-qrcode"></i> Show QR Code
+          </button>
+          <button id="remake-btn" class="btn btn-primary">
+            <i class="fa-solid fa-heart-circle-plus"></i> Make Your Own Surprise
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MODAL: SHARE & QR CODE -->
+  <div id="qr-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <button class="close-modal-btn" id="close-qr-modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3><i class="fa-solid fa-qrcode"></i> Share Romantic Surprise</h3>
+      <p>Scan this QR code on any mobile phone to view your personalized surprise!</p>
+      
+      <div id="qrcode-container" class="qr-box"></div>
+
+      <div class="share-input-group mt-3">
+        <input type="text" id="share-url-input" readonly>
+        <button id="modal-copy-btn" class="btn btn-primary"><i class="fa-solid fa-copy"></i> Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
