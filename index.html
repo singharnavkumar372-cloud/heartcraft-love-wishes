@@ -465,7 +465,31 @@
 
   </div>
 
-  <!-- MODAL: SHARE & QR CODE -->
+  <!-- MODAL 1: GENERATED LINK IS READY MODAL -->
+  <div id="link-ready-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <button class="close-modal-btn" id="close-ready-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div class="ready-badge">🎉 Surprise Created!</div>
+      <h3><i class="fa-solid fa-heart text-danger"></i> Your Link for <span id="ready-girl-name">Her</span> is Ready!</h3>
+      <p class="mt-2 text-muted">Copy this exact magic link and send it to her on WhatsApp, Instagram, or SMS. Anyone opening it will see your custom surprise!</p>
+      
+      <div class="share-input-group mt-3">
+        <input type="text" id="created-magic-url" readonly>
+        <button id="modal-copy-ready-btn" class="btn btn-primary"><i class="fa-solid fa-copy"></i> Copy</button>
+      </div>
+
+      <div class="ready-actions mt-3">
+        <button id="modal-whatsapp-ready-btn" class="btn btn-whatsapp w-100">
+          <i class="fa-brands fa-whatsapp"></i> Send Directly on WhatsApp
+        </button>
+        <button id="modal-preview-ready-btn" class="btn btn-secondary w-100 mt-2">
+          <i class="fa-solid fa-eye"></i> Preview Surprise Experience
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SHARE & QR CODE -->
   <div id="qr-modal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <button class="close-modal-btn" id="close-qr-modal"><i class="fa-solid fa-xmark"></i></button>
@@ -481,7 +505,7 @@
     </div>
   </div>
 
-  <!-- MODAL: APP DOWNLOAD & APK GUIDE -->
+  <!-- MODAL 3: APP DOWNLOAD & APK GUIDE -->
   <div id="app-download-modal" class="modal-overlay hidden">
     <div class="modal-card glass-card">
       <button class="close-modal-btn" id="close-app-modal"><i class="fa-solid fa-xmark"></i></button>

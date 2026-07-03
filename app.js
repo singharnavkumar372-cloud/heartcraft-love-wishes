@@ -79,25 +79,67 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup Download Banner & Modal Listeners
   initDownloadModal();
 
-  // Check Hash Signature
+  // Check URL Signature (Query params or Hash)
   checkUrlPayload();
 
   window.addEventListener('hashchange', checkUrlPayload);
+  window.addEventListener('popstate', checkUrlPayload);
 
   function checkUrlPayload() {
-    if (window.location.hash && window.location.hash.includes('#card=')) {
-      try {
-        const rawPayloadStr = window.location.hash.split('#card=')[1];
-        const payload = decodePayload(rawPayloadStr);
-        if (payload && payload.boyName && payload.girlName) {
-          renderRecipientMode(payload);
-          return;
-        }
-      } catch (e) {
-        console.error("Payload decode error:", e);
+    const payload = getPayloadFromUrl();
+    if (payload && payload.boyName && payload.girlName) {
+      renderRecipientMode(payload);
+    } else {
+      initCreatorStudio();
+    }
+  }
+
+  /* ==========================================================================
+     MULTI-FORMAT URL PAYLOAD PARSER
+     ========================================================================== */
+  function getPayloadFromUrl() {
+    let rawStr = null;
+
+    // 1. Check URL query parameters (?card=... or ?data=...)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('card')) {
+        rawStr = urlParams.get('card');
+      } else if (urlParams.has('data')) {
+        rawStr = urlParams.get('data');
+      }
+    } catch(e) {}
+
+    // 2. Check URL Hash (#card=... or #data=...)
+    if (!rawStr && window.location.hash) {
+      const hash = window.location.hash;
+      if (hash.includes('card=')) {
+        rawStr = hash.split('card=')[1];
+      } else if (hash.includes('data=')) {
+        rawStr = hash.split('data=')[1];
       }
     }
-    initCreatorStudio();
+
+    // 3. Fallback Regex match anywhere in href
+    if (!rawStr) {
+      const fullHref = decodeURIComponent(window.location.href);
+      const match = fullHref.match(/(?:card|data)=([A-Za-z0-9_\-]+)/);
+      if (match && match[1]) {
+        rawStr = match[1];
+      }
+    }
+
+    if (!rawStr) return null;
+
+    // Clean trailing query or hash chars
+    rawStr = rawStr.split('&')[0].split('#')[0].trim();
+
+    try {
+      return decodePayload(rawStr);
+    } catch (e) {
+      console.error("Payload decode error:", e);
+      return null;
+    }
   }
 
   /* ==========================================================================
@@ -221,14 +263,30 @@ document.addEventListener('DOMContentLoaded', () => {
       state.musicTrack = document.getElementById('music-track').value;
       state.enableNoEscape = document.getElementById('enable-no-escape').checked;
 
-      // Encode Payload to Hash
+      // Encode Payload to Canonical Query URL
       const encodedPayload = encodePayload(state);
-      
-      // Update URL hash
-      window.location.hash = `#card=${encodedPayload}`;
+      const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+      const shareUrl = `${baseUrl}?card=${encodedPayload}`;
 
-      // Render Showcase Mode immediately
-      renderRecipientMode(state);
+      // Show Link Ready Modal
+      document.getElementById('ready-girl-name').innerText = state.girlName;
+      document.getElementById('created-magic-url').value = shareUrl;
+
+      const modal = document.getElementById('link-ready-modal');
+      modal.classList.remove('hidden');
+
+      document.getElementById('close-ready-modal').onclick = () => modal.classList.add('hidden');
+      document.getElementById('modal-copy-ready-btn').onclick = () => copyToClipboard(shareUrl);
+      
+      document.getElementById('modal-whatsapp-ready-btn').onclick = () => {
+        const msg = encodeURIComponent(`💖 ${state.boyName} sent you a special romantic surprise on HeartCraft! Open your link here: ${shareUrl}`);
+        window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+      };
+
+      document.getElementById('modal-preview-ready-btn').onclick = () => {
+        modal.classList.add('hidden');
+        renderRecipientMode(state);
+      };
     };
   }
 
@@ -411,21 +469,24 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Share Bar Actions
-    const currentUrl = window.location.href;
-    document.getElementById('copy-link-btn').onclick = () => copyToClipboard(currentUrl);
+    // Share Bar Actions (Using Query String format)
+    const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+    const currentShareUrl = `${baseUrl}?card=${encodePayload(payload)}`;
+
+    document.getElementById('copy-link-btn').onclick = () => copyToClipboard(currentShareUrl);
     document.getElementById('whatsapp-share-btn').onclick = () => {
-      const text = encodeURIComponent(`💖 ${payload.boyName} sent you a special romantic surprise on HeartCraft! Open your link here: ${currentUrl}`);
+      const text = encodeURIComponent(`💖 ${payload.boyName} sent you a special romantic surprise on HeartCraft! Open your link here: ${currentShareUrl}`);
       window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     };
 
     document.getElementById('download-card-btn').onclick = saveCardSnapshot;
 
-    document.getElementById('qr-code-btn').onclick = () => openQrModal(currentUrl);
+    document.getElementById('qr-code-btn').onclick = () => openQrModal(currentShareUrl);
 
     navCreateBtn.onclick = () => {
+      window.location.search = '';
       window.location.hash = '';
-      window.location.reload();
+      window.location.href = baseUrl;
     };
   }
 
@@ -730,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-      alert("💖 Copied to clipboard!");
+      alert("💖 Link copied to clipboard!");
     }).catch(() => {
       prompt("Copy link manually:", text);
     });
