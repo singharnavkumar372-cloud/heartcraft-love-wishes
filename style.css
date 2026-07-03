@@ -68,6 +68,65 @@ body {
   position: relative;
 }
 
+/* Top Download Banner */
+.top-banner {
+  background: linear-gradient(90deg, #ff3366, #ff758c);
+  color: white;
+  padding: 10px 16px;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.banner-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-banner-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.btn-gold {
+  background: var(--accent-gold);
+  color: #1a0628;
+  font-weight: 700;
+}
+
+/* Quick App Link Box */
+.app-link-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  max-width: 600px;
+  margin: 16px auto 0 auto;
+}
+
+.app-link-box code {
+  color: var(--accent-gold);
+}
+
 /* Background Particle Canvas */
 #particles-canvas {
   position: fixed;
@@ -119,6 +178,7 @@ body {
 }
 
 .text-center { text-align: center; }
+.text-gold { color: var(--accent-gold); }
 .mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }
 .mt-4 { margin-top: 1.5rem; }
@@ -596,6 +656,25 @@ select:focus {
   color: var(--text-muted);
 }
 
+/* Download Options Card inside Modal */
+.download-opt-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+}
+
+.opt-icon {
+  font-size: 2rem;
+}
+
+.android-color { color: #3ddc84; }
+.apple-color { color: #ffffff; }
+
 /* Showcase Cards */
 .card-display {
   padding: 40px 32px;
@@ -878,7 +957,7 @@ select:focus {
 .modal-card {
   padding: 32px;
   width: 90%;
-  max-width: 450px;
+  max-width: 480px;
   text-align: center;
   position: relative;
 }
@@ -932,5 +1011,10 @@ select:focus {
   }
   .install-btn span {
     display: none;
+  }
+  .banner-content {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
   }
 }

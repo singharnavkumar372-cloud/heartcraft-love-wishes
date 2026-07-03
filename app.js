@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     audioCtx: null
   };
 
+  const APP_URL = "https://singharnavkumar372-cloud.github.io/heartcraft-love-wishes/";
+
   // Preset Text Templates
   const PRESETS = {
     'gf-proposal': {
@@ -73,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Register PWA Service Worker & Install Prompt
   initPwaInstaller();
+
+  // Setup Download Banner & Modal Listeners
+  initDownloadModal();
 
   // Check Hash Signature
   checkUrlPayload();
@@ -130,6 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
     creatorView.classList.add('active');
     receiverView.classList.remove('active');
     navCreateBtn.classList.add('hidden');
+
+    // Copy App Link Button
+    const copyAppBtn = document.getElementById('copy-app-link-btn');
+    if (copyAppBtn) {
+      copyAppBtn.onclick = () => copyToClipboard(APP_URL);
+    }
 
     // Step Navigation
     document.querySelectorAll('.btn-next').forEach(btn => {
@@ -419,6 +430,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================================
+     APP DOWNLOAD BANNER & MODAL LOGIC
+     ========================================================================== */
+  function initDownloadModal() {
+    const banner = document.getElementById('top-download-banner');
+    const bannerBtn = document.getElementById('banner-download-btn');
+    const bannerClose = document.getElementById('banner-close-btn');
+
+    const modal = document.getElementById('app-download-modal');
+    const navInstallBtn = document.getElementById('pwa-install-btn');
+    const closeBtn = document.getElementById('close-app-modal');
+    const copyAppBtn = document.getElementById('modal-copy-app-btn');
+
+    if (bannerClose) {
+      bannerClose.onclick = () => banner.style.display = 'none';
+    }
+
+    const openAppModal = () => {
+      modal.classList.remove('hidden');
+    };
+
+    if (bannerBtn) bannerBtn.onclick = openAppModal;
+    if (navInstallBtn) navInstallBtn.onclick = openAppModal;
+
+    if (closeBtn) {
+      closeBtn.onclick = () => modal.classList.add('hidden');
+    }
+
+    if (copyAppBtn) {
+      copyAppBtn.onclick = () => copyToClipboard(APP_URL);
+    }
+  }
+
+  /* ==========================================================================
      COUNTDOWN TIMER ENGINE
      ========================================================================== */
   function startCountdown(dateStr) {
@@ -469,26 +513,27 @@ document.addEventListener('DOMContentLoaded', () => {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration skipped', err));
     }
 
-    const pwaBtn = document.getElementById('pwa-install-btn');
-    
+    const modalInstallBtn = document.getElementById('modal-install-pwa-btn');
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      pwaBtn.style.display = 'inline-flex';
     });
 
-    pwaBtn.onclick = async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          pwaBtn.style.display = 'none';
+    if (modalInstallBtn) {
+      modalInstallBtn.onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            document.getElementById('app-download-modal').classList.add('hidden');
+          }
+          deferredPrompt = null;
+        } else {
+          alert("📲 Android APK / PWA Download Guide:\n\n1. In Chrome / Edge: Tap 3 dots (⋮) in upper right.\n2. Tap 'Install app' or 'Add to Home screen'.\n3. HeartCraft will be installed directly to your phone menu as an Android APK app!");
         }
-        deferredPrompt = null;
-      } else {
-        alert("📲 To install HeartCraft as an App on your phone:\n\n• Android/Chrome: Tap 3 dots (⋮) -> 'Add to Home screen' or 'Install app'\n• iPhone/Safari: Tap Share (⎋) -> 'Add to Home Screen'");
-      }
-    };
+      };
+    }
   }
 
   /* ==========================================================================
@@ -685,9 +730,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-      alert("💖 Magic link copied to clipboard! Share it with your special someone.");
+      alert("💖 Copied to clipboard!");
     }).catch(() => {
-      prompt("Copy your magic link manually:", text);
+      prompt("Copy link manually:", text);
     });
   }
 
