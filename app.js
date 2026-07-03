@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Application State
   const state = {
+    role: 'boy-to-girl',
     boyName: '',
     girlName: '',
     surpriseType: 'gf-proposal',
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     message: '',
     specialDate: '',
     nickname: '',
+    scratchSecret: '',
     quizQuestion: '',
     quizAnswer: '',
     theme: 'rose',
@@ -25,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const APP_URL = "https://singharnavkumar372-cloud.github.io/heartcraft-love-wishes/";
 
-  // Preset Text Templates
-  const PRESETS = {
+  // Presets Dictionary
+  const PRESETS_BOY_TO_GIRL = {
     'gf-proposal': {
       title: "Will You Be My Girlfriend?",
       message: "From the moment you walked into my life, every single day has felt brighter and more beautiful. Your smile lights up my world in ways words can never fully capture. I can't imagine my journey without you by my side. Will you make me the happiest person alive and be my girlfriend?"
@@ -50,6 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
     'reasons-love': {
       title: "Reasons Why You Are My World",
       message: "Here are just a few of the infinite reasons why my heart chose you:"
+    }
+  };
+
+  const PRESETS_GIRL_TO_BOY = {
+    'gf-proposal': {
+      title: "Will You Be My Boyfriend? 💙",
+      message: "From the moment you entered my life, you became my hero, my happiest thought, and my favorite person to laugh with. You make me feel so safe, loved, and special. I don't want to go another day without calling you mine. Will you make me the happiest girl in the world and be my boyfriend?"
+    },
+    'wife-proposal': {
+      title: "Will You Marry Me? 🤵‍♂️",
+      message: "You are my rock, my best friend, and my soulmate. I want to spend every single sunrise and sunset with you by my side. Building a future together is my absolute dream. Will you do me the greatest honor of becoming my husband and spending forever with me?"
+    },
+    'love-letter': {
+      title: "To My Handsome King 👑",
+      message: "Dearest Handsome,\n\nI wanted to write this letter to remind you of how deeply cherished you are. Thank you for being so kind, caring, and strong. Every moment with you feels like a dream come true.\n\nYou have my entire heart today, tomorrow, and for all eternity!"
+    },
+    'birthday-wish': {
+      title: "Happy Birthday My Handsome Prince! 🎂",
+      message: "Wishing the happiest birthday to the most amazing guy in the world! You bring so much joy, strength, and love into my life. May your birthday be filled with endless smiles, surprises, and everything your heart desires!"
+    },
+    'anniversary-wish': {
+      title: "Happy Anniversary My Handsome 🥂",
+      message: "Happy Anniversary to the guy who stole my heart! Every milestone with you is my favorite memory. Here is to celebrating us and making a million more magical memories together!"
+    },
+    'reasons-love': {
+      title: "Reasons Why You Are My Favorite Person",
+      message: "Here are just a few of the reasons why I fell in love with you:"
     }
   };
 
@@ -87,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function checkUrlPayload() {
     const payload = getPayloadFromUrl();
-    if (payload && payload.boyName && payload.girlName) {
+    if (payload && (payload.boyName || payload.senderName) && (payload.girlName || payload.recipientName)) {
       renderRecipientMode(payload);
     } else {
       initCreatorStudio();
@@ -100,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function getPayloadFromUrl() {
     let rawStr = null;
 
-    // 1. Check URL query parameters (?card=... or ?data=... or ?c=...)
     try {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('card')) rawStr = urlParams.get('card');
@@ -108,26 +136,23 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (urlParams.has('c')) rawStr = urlParams.get('c');
     } catch(e) {}
 
-    // 2. Check URL Hash (#card=... or #data=... or #c=...)
     if (!rawStr && window.location.hash) {
       const hash = window.location.hash;
       const match = hash.match(/(?:card|data|c)=([^&]+)/);
       if (match) rawStr = match[1];
     }
 
-    // 3. Regex match anywhere in location.href (e.g. if %23card= or %3Fcard=)
     if (!rawStr) {
       const href = decodeURIComponent(window.location.href);
       const match = href.match(/(?:card|data|c)=([^&/#]+)/);
       if (match) rawStr = match[1];
     }
 
-    // Attempt Base64 URL Decode
     if (rawStr) {
       rawStr = rawStr.split('&')[0].split('#')[0].trim();
       try {
         const decoded = decodePayload(rawStr);
-        if (decoded && decoded.boyName && decoded.girlName) {
+        if (decoded && (decoded.boyName || decoded.senderName)) {
           return decoded;
         }
       } catch (e) {
@@ -135,18 +160,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 4. Plain Query Params Fallback (?boy=Arnav&girl=Ananya&title=...&msg=...)
+    // Plain Query Params Fallback
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.has('boy') && params.has('girl')) {
+      if ((params.has('boy') || params.has('sender')) && (params.has('girl') || params.has('recipient'))) {
         return {
-          boyName: params.get('boy'),
-          girlName: params.get('girl'),
+          role: params.get('role') || 'boy-to-girl',
+          boyName: params.get('boy') || params.get('sender'),
+          girlName: params.get('girl') || params.get('recipient'),
           surpriseType: params.get('type') || 'gf-proposal',
           title: params.get('title') || '',
           message: params.get('msg') || params.get('message') || '',
           specialDate: params.get('date') || '',
           nickname: params.get('nick') || '',
+          scratchSecret: params.get('scratch') || '',
           theme: params.get('theme') || 'rose',
           particleStyle: params.get('particle') || 'hearts',
           musicTrack: params.get('music') || 'piano',
@@ -155,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) {}
 
-    // 5. LocalStorage Fallback if user created on same browser
+    // LocalStorage Fallback
     try {
       const local = localStorage.getItem('heartcraft_last_card');
       if (local && (window.location.search.includes('preview') || window.location.hash.includes('preview'))) {
@@ -193,10 +220,67 @@ document.addEventListener('DOMContentLoaded', () => {
     receiverView.classList.remove('active');
     navCreateBtn.classList.add('hidden');
 
-    // Copy App Link Button
     const copyAppBtn = document.getElementById('copy-app-link-btn');
     if (copyAppBtn) {
       copyAppBtn.onclick = () => copyToClipboard(APP_URL);
+    }
+
+    // Role Switcher Click Handlers
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.onclick = (e) => {
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+        const currentCard = e.currentTarget;
+        currentCard.classList.add('active');
+        const roleVal = currentCard.getAttribute('data-role');
+        state.role = roleVal;
+        updateRoleLabels(roleVal);
+      };
+    });
+
+    function updateRoleLabels(role) {
+      const labelSender = document.getElementById('label-sender');
+      const labelRecipient = document.getElementById('label-recipient');
+      const senderInput = document.getElementById('sender-name');
+      const recipientInput = document.getElementById('recipient-name');
+
+      const expTitleGf = document.getElementById('exp-title-gf');
+      const expSubGf = document.getElementById('exp-sub-gf');
+      const expTitleWife = document.getElementById('exp-title-wife');
+      const expSubWife = document.getElementById('exp-sub-wife');
+
+      if (role === 'girl-to-boy') {
+        labelSender.innerHTML = `<i class="fa-solid fa-venus"></i> Your Name (Girl / Sender)`;
+        labelRecipient.innerHTML = `<i class="fa-solid fa-mars"></i> Partner's Name (Boyfriend / Recipient)`;
+        senderInput.placeholder = "e.g., Ananya";
+        recipientInput.placeholder = "e.g., Arnav";
+
+        if (expTitleGf) expTitleGf.innerText = "BF Proposal";
+        if (expSubGf) expSubGf.innerText = '"Will you be my boyfriend?" with escaping No button.';
+        if (expTitleWife) expTitleWife.innerText = "Husband Proposal";
+        if (expSubWife) expSubWife.innerText = '"Will you marry me?" with virtual ring box reveal.';
+
+        const presets = PRESETS_GIRL_TO_BOY[state.surpriseType];
+        if (presets) {
+          document.getElementById('custom-title').value = presets.title;
+          document.getElementById('custom-message').value = presets.message;
+        }
+      } else {
+        labelSender.innerHTML = `<i class="fa-solid fa-mars"></i> Your Name (Sender)`;
+        labelRecipient.innerHTML = `<i class="fa-solid fa-venus"></i> Partner's Name (Recipient)`;
+        senderInput.placeholder = "e.g., Arnav";
+        recipientInput.placeholder = "e.g., Ananya";
+
+        if (expTitleGf) expTitleGf.innerText = "GF Proposal";
+        if (expSubGf) expSubGf.innerText = '"Will you be my girlfriend?" with escaping No button.';
+        if (expTitleWife) expTitleWife.innerText = "Wife Proposal";
+        if (expSubWife) expSubWife.innerText = '"Will you marry me?" with virtual ring box reveal.';
+
+        const presets = PRESETS_BOY_TO_GIRL[state.surpriseType];
+        if (presets) {
+          document.getElementById('custom-title').value = presets.title;
+          document.getElementById('custom-message').value = presets.message;
+        }
+      }
     }
 
     // Step Navigation
@@ -224,7 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.checked = true;
         state.surpriseType = radio.value;
 
-        const preset = PRESETS[state.surpriseType];
+        const dict = state.role === 'girl-to-boy' ? PRESETS_GIRL_TO_BOY : PRESETS_BOY_TO_GIRL;
+        const preset = dict[state.surpriseType];
         if (preset) {
           document.getElementById('custom-title').value = preset.title;
           document.getElementById('custom-message').value = preset.message;
@@ -236,7 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('preset-btn').onclick = () => {
       const radio = document.querySelector('input[name="surprise-type"]:checked');
       const type = radio ? radio.value : 'gf-proposal';
-      const preset = PRESETS[type];
+      const dict = state.role === 'girl-to-boy' ? PRESETS_GIRL_TO_BOY : PRESETS_BOY_TO_GIRL;
+      const preset = dict[type];
       if (preset) {
         document.getElementById('custom-title').value = preset.title;
         document.getElementById('custom-message').value = preset.message;
@@ -257,21 +343,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate Share Link & Preview
     document.getElementById('generate-btn').onclick = () => {
-      const boyName = document.getElementById('boy-name').value.trim();
-      const girlName = document.getElementById('girl-name').value.trim();
+      const senderName = document.getElementById('sender-name').value.trim();
+      const recipientName = document.getElementById('recipient-name').value.trim();
 
-      if (!boyName || !girlName) {
+      if (!senderName || !recipientName) {
         alert("Please enter both your name and your partner's name!");
         switchStep('1');
         return;
       }
 
-      state.boyName = boyName;
-      state.girlName = girlName;
-      state.title = document.getElementById('custom-title').value.trim() || PRESETS[state.surpriseType].title;
-      state.message = document.getElementById('custom-message').value.trim() || PRESETS[state.surpriseType].message;
+      state.boyName = senderName;
+      state.girlName = recipientName;
+      
+      const dict = state.role === 'girl-to-boy' ? PRESETS_GIRL_TO_BOY : PRESETS_BOY_TO_GIRL;
+
+      state.title = document.getElementById('custom-title').value.trim() || dict[state.surpriseType].title;
+      state.message = document.getElementById('custom-message').value.trim() || dict[state.surpriseType].message;
       state.specialDate = document.getElementById('special-date').value;
       state.nickname = document.getElementById('nickname-girl').value.trim();
+      state.scratchSecret = document.getElementById('scratch-secret').value.trim();
       state.quizQuestion = document.getElementById('quiz-question').value.trim();
       state.quizAnswer = document.getElementById('quiz-answer').value.trim();
       state.particleStyle = document.getElementById('particle-style').value;
@@ -401,6 +491,21 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('view-boy-name').innerText = payload.boyName;
       document.getElementById('view-proposal-title').innerText = payload.title;
       document.getElementById('view-proposal-message').innerText = payload.message;
+
+      // Scratch Card Handling
+      const scratchBox = document.getElementById('scratch-card-box');
+      if (payload.scratchSecret) {
+        scratchBox.classList.remove('hidden');
+        document.getElementById('scratch-content-text').innerText = payload.scratchSecret;
+        const cover = document.getElementById('scratch-cover');
+        cover.classList.remove('scratched');
+        cover.onclick = () => {
+          cover.classList.add('scratched');
+          fireConfetti();
+        };
+      } else {
+        scratchBox.classList.add('hidden');
+      }
 
       const ringBox = document.getElementById('ring-box-wrapper');
       if (payload.surpriseType === 'wife-proposal') {

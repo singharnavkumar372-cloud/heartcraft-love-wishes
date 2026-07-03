@@ -68,6 +68,90 @@ body {
   position: relative;
 }
 
+/* Role Switcher Grid */
+.role-switcher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.role-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.role-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.role-card.active {
+  border-color: var(--accent-gold);
+  background: rgba(255, 51, 102, 0.25);
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+/* Secret Scratch Card Box */
+.scratch-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px dashed var(--accent-gold);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+}
+
+.scratch-box h4 {
+  font-size: 0.95rem;
+  color: var(--accent-gold);
+  margin-bottom: 10px;
+}
+
+.scratch-area {
+  position: relative;
+  min-height: 70px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.scratch-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ffd700, #ffb703);
+  color: #1a0628;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: opacity 0.5s ease;
+  user-select: none;
+}
+
+.scratch-cover.scratched {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scratch-content {
+  background: rgba(255, 255, 255, 0.9);
+  color: #2b1055;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
 /* Top Download Banner */
 .top-banner {
   background: linear-gradient(90deg, #ff3366, #ff758c);

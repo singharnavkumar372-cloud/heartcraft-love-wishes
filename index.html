@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HeartCraft - Express Your Love & Create Timeless Moments</title>
-  <meta name="description" content="Create customized romantic proposals, love letters, birthday wishes, and special surprises with instant shareable links!">
+  <meta name="description" content="Create customized romantic proposals, love letters, birthday wishes, and special surprises for your partner with instant shareable links!">
   
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
@@ -72,9 +72,9 @@
     <!-- VIEW 1: CREATOR STUDIO (FORM MODE) -->
     <main id="creator-view" class="view-section active">
       <div class="hero-header text-center">
-        <span class="badge"><i class="fa-solid fa-sparkles"></i> Express Your Heart</span>
+        <span class="badge"><i class="fa-solid fa-sparkles"></i> For Boys & Girls</span>
         <h1 class="gradient-text">Craft Magical Love Proposals & Wishes</h1>
-        <p class="subtitle">Design customized romantic proposals, love letters, birthday surprises, and interactive memory moments with instant shareable links.</p>
+        <p class="subtitle">Propose to your Boyfriend or Girlfriend, write custom love letters, birthday surprises, & memories with instant shareable links!</p>
         
         <!-- Quick App Link Bar -->
         <div class="app-link-box glass-card mt-3">
@@ -88,7 +88,7 @@
         <div class="step-progress">
           <div class="step-item active" data-step="1">
             <span class="step-num">1</span>
-            <span class="step-label">Names & Type</span>
+            <span class="step-label">Roles & Names</span>
           </div>
           <div class="step-line"></div>
           <div class="step-item" data-step="2">
@@ -105,16 +105,36 @@
         <form id="love-form" onsubmit="return false;">
           <!-- STEP 1: Basic Information -->
           <div class="form-step active" id="step-1">
-            <h3><i class="fa-solid fa-user-hearts"></i> Who is this special surprise for?</h3>
             
+            <!-- Proposal Mode Switcher -->
+            <div class="input-group">
+              <label><i class="fa-solid fa-venus-mars"></i> Who is creating this proposal / surprise?</label>
+              <div class="role-switcher-grid">
+                <label class="role-card active" data-role="boy-to-girl">
+                  <input type="radio" name="proposal-role" value="boy-to-girl" checked hidden>
+                  <span>👦❤️👧 Boy Proposing to Girl</span>
+                </label>
+
+                <label class="role-card" data-role="girl-to-boy">
+                  <input type="radio" name="proposal-role" value="girl-to-boy" hidden>
+                  <span>👧❤️👦 Girl Proposing to Boy</span>
+                </label>
+
+                <label class="role-card" data-role="neutral">
+                  <input type="radio" name="proposal-role" value="neutral" hidden>
+                  <span>💖 Soulmate / Any Love</span>
+                </label>
+              </div>
+            </div>
+
             <div class="form-grid">
               <div class="input-group">
-                <label for="boy-name"><i class="fa-solid fa-mars"></i> Your Name (Boy / Sender)</label>
-                <input type="text" id="boy-name" placeholder="e.g., Arnav" required autocomplete="off">
+                <label for="sender-name" id="label-sender"><i class="fa-solid fa-user"></i> Your Name (Sender)</label>
+                <input type="text" id="sender-name" placeholder="e.g., Arnav or Ananya" required autocomplete="off">
               </div>
               <div class="input-group">
-                <label for="girl-name"><i class="fa-solid fa-venus"></i> Partner's Name (Girl / Recipient)</label>
-                <input type="text" id="girl-name" placeholder="e.g., Ananya" required autocomplete="off">
+                <label for="recipient-name" id="label-recipient"><i class="fa-solid fa-heart"></i> Partner's Name (Recipient)</label>
+                <input type="text" id="recipient-name" placeholder="e.g., Ananya or Arnav" required autocomplete="off">
               </div>
             </div>
 
@@ -124,18 +144,18 @@
                 <label class="exp-card active">
                   <input type="radio" name="surprise-type" value="gf-proposal" checked hidden>
                   <div class="exp-content">
-                    <span class="exp-icon">💖</span>
-                    <h4>GF Proposal</h4>
-                    <p>"Will you be my girlfriend?" with playful escaping No button.</p>
+                    <span class="exp-icon" id="exp-icon-gf">💖</span>
+                    <h4 id="exp-title-gf">BF / GF Proposal</h4>
+                    <p id="exp-sub-gf">"Will you be my partner?" with escaping No button.</p>
                   </div>
                 </label>
 
                 <label class="exp-card">
                   <input type="radio" name="surprise-type" value="wife-proposal" hidden>
                   <div class="exp-content">
-                    <span class="exp-icon">💍</span>
-                    <h4>Wife Proposal</h4>
-                    <p>"Will you marry me?" with virtual ring box reveal.</p>
+                    <span class="exp-icon" id="exp-icon-wife">💍</span>
+                    <h4 id="exp-title-wife">Marriage Proposal</h4>
+                    <p id="exp-sub-wife">"Will you marry me?" with virtual ring box reveal.</p>
                   </div>
                 </label>
 
@@ -170,7 +190,7 @@
                   <input type="radio" name="surprise-type" value="reasons-love" hidden>
                   <div class="exp-content">
                     <span class="exp-icon">🧩</span>
-                    <h4>100 Reasons I Love You</h4>
+                    <h4>Reasons Why I Love You</h4>
                     <p>Interactive card flipper deck with romantic traits.</p>
                   </div>
                 </label>
@@ -190,7 +210,7 @@
 
             <div class="input-group">
               <label for="custom-title"><i class="fa-solid fa-heading"></i> Headline / Catchphrase</label>
-              <input type="text" id="custom-title" placeholder="e.g., My Dearest Ananya, You Have Stolen My Heart Forever...">
+              <input type="text" id="custom-title" placeholder="e.g., My Handsome Prince, You Have Stolen My Heart Forever...">
             </div>
 
             <div class="input-group">
@@ -198,7 +218,7 @@
                 <label for="custom-message"><i class="fa-solid fa-heart"></i> Your Deepest Message</label>
                 <button type="button" id="preset-btn" class="text-link"><i class="fa-solid fa-dice-three"></i> Insert Romantic Preset</button>
               </div>
-              <textarea id="custom-message" rows="5" placeholder="Write your heartfelt message here... You can describe how you met, your favorite memories, or why she means the world to you."></textarea>
+              <textarea id="custom-message" rows="5" placeholder="Write your heartfelt message here... You can describe how you met, your favorite memories, or why he/she means the world to you."></textarea>
             </div>
 
             <div class="form-grid">
@@ -207,9 +227,15 @@
                 <input type="date" id="special-date">
               </div>
               <div class="input-group">
-                <label for="nickname-girl"><i class="fa-solid fa-smile-beam"></i> Her Special Nickname (Optional)</label>
-                <input type="text" id="nickname-girl" placeholder="e.g., My Sunshine, Princess, Sweetheart">
+                <label for="nickname-girl"><i class="fa-solid fa-smile-beam"></i> Partner's Special Nickname (Optional)</label>
+                <input type="text" id="nickname-girl" placeholder="e.g., Handsome, My King, Sunshine, Princess">
               </div>
+            </div>
+
+            <!-- Secret Scratch Note -->
+            <div class="input-group mt-3">
+              <label><i class="fa-solid fa-hand-pointer"></i> Add Secret Scratch-off Message (Optional)</label>
+              <input type="text" id="scratch-secret" placeholder="e.g., Secret: I fell in love with your eyes on our very first coffee date! ❤️">
             </div>
 
             <!-- Quiz Option -->
@@ -352,15 +378,15 @@
           </div>
         </div>
 
-        <!-- EXPERIENCE 1: PROPOSAL CARD (GF / WIFE) -->
+        <!-- EXPERIENCE 1: PROPOSAL CARD (GF / WIFE / BF / HUSBAND) -->
         <div id="proposal-card-container" class="card-display glass-card hidden">
           <div class="romantic-header">
-            <span class="love-badge"><i class="fa-solid fa-crown"></i> Dedicated to <span id="view-girl-name">Her</span></span>
+            <span class="love-badge"><i class="fa-solid fa-crown"></i> Dedicated to <span id="view-girl-name">Partner</span></span>
             <h1 id="view-proposal-title" class="font-serif">Will You Be Mine Forever?</h1>
-            <p id="view-sender-sub">From <span id="view-boy-name">Him</span> with endless love <i class="fa-solid fa-heart text-danger"></i></p>
+            <p id="view-sender-sub">From <span id="view-boy-name">Your Love</span> with endless love <i class="fa-solid fa-heart text-danger"></i></p>
           </div>
 
-          <!-- Virtual Ring Box (Visible for Wife Proposal) -->
+          <!-- Virtual Ring Box (Visible for Marriage Proposal) -->
           <div id="ring-box-wrapper" class="ring-box-container hidden">
             <div class="ring-box" id="virtual-ring-box">
               <div class="ring-lid"><span>✨</span></div>
@@ -377,6 +403,15 @@
             <p id="view-proposal-message" class="typewriter-text font-serif-italic"></p>
           </div>
 
+          <!-- Secret Scratch Card (If secret added) -->
+          <div id="scratch-card-box" class="scratch-box mt-3 hidden">
+            <h4><i class="fa-solid fa-wand-magic"></i> Secret Scratch Card Reveal</h4>
+            <div class="scratch-area" id="scratch-area-target">
+              <div class="scratch-cover" id="scratch-cover">Tap / Scratch to reveal secret note</div>
+              <div class="scratch-content" id="scratch-content-text"></div>
+            </div>
+          </div>
+
           <div class="proposal-actions mt-4" id="proposal-buttons-area">
             <button id="yes-btn" class="btn btn-yes btn-glow">
               <i class="fa-solid fa-heart"></i> YES! 1000x YES!
@@ -388,7 +423,7 @@
 
           <!-- Celebration Answer Banner (Hidden until Yes clicked) -->
           <div id="yes-celebration-banner" class="celebration-banner hidden">
-            <h2>🎉 SHE SAID YES! 💍💖</h2>
+            <h2>🎉 THEY SAID YES! 💍💖</h2>
             <p>This is the start of our beautiful forever chapter!</p>
             <div class="date-badge" id="celebration-date-badge"></div>
           </div>
@@ -412,7 +447,7 @@
         <!-- EXPERIENCE 3: BIRTHDAY WISH CARD -->
         <div id="birthday-card-container" class="card-display glass-card hidden text-center">
           <div class="bday-decor">🎂 ✨ 🎉</div>
-          <h1 id="view-bday-title" class="font-serif">Happy Birthday My Queen!</h1>
+          <h1 id="view-bday-title" class="font-serif">Happy Birthday My Love!</h1>
           <p class="subtitle font-serif-italic">Wishing the most wonderful birthday to <span id="view-bday-girl"></span></p>
 
           <!-- Interactive Birthday Cake -->
@@ -470,8 +505,8 @@
     <div class="modal-card glass-card">
       <button class="close-modal-btn" id="close-ready-modal"><i class="fa-solid fa-xmark"></i></button>
       <div class="ready-badge">🎉 Surprise Created!</div>
-      <h3><i class="fa-solid fa-heart text-danger"></i> Your Link for <span id="ready-girl-name">Her</span> is Ready!</h3>
-      <p class="mt-2 text-muted">Copy this exact magic link and send it to her on WhatsApp, Instagram, or SMS. Anyone opening it will see your custom surprise!</p>
+      <h3><i class="fa-solid fa-heart text-danger"></i> Your Link for <span id="ready-girl-name">Partner</span> is Ready!</h3>
+      <p class="mt-2 text-muted">Copy this exact magic link and send it on WhatsApp, Instagram, or SMS. Anyone opening it will see your custom surprise!</p>
       
       <div class="share-input-group mt-3">
         <input type="text" id="created-magic-url" readonly>
